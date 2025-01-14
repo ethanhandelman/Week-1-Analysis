@@ -94,8 +94,6 @@ def analyze_parallel(filename, start_time, end_time):
 
     return color_counter, pos_counter
 
-    
-
 def main():
     parser = argparse.ArgumentParser(description='Analyze color placement frequency in time range')
     parser.add_argument('filename', help='filename to the CSV file')
