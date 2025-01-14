@@ -8,7 +8,7 @@ from datetime import datetime as dt
 INPUT_DT_FORMAT = '%Y-%m-%d %H'
 DATA_DT_FORMAT = '%Y-%m-%d %H:%M:%S.%f UTC'
 
-CHUNK_SIZE = 100_000
+CHUNK_SIZE = 200_000
 NUM_WORKERS = max(multiprocessing.cpu_count() - 1, 1)
 
 def parse_datetime_arg(dt_str):
@@ -56,7 +56,7 @@ def analyze_chunk(lines, start_time, end_time):
         timestamp = row[0]
         if start_time <= timestamp <= end_time:
             color_counter[row[2]] += 1
-            pos_counter[row[3]] 
+            pos_counter[row[3]] += 1
     return color_counter, pos_counter
 
 def analyze_parallel(filename, start_time, end_time):
@@ -121,6 +121,11 @@ def main():
 
     elapsed_ms = (t1 - t0) / 1_000_000
     print(f"Execution time (multicore, chunk size {CHUNK_SIZE}): {elapsed_ms:.2f} ms")
+
+    print(f"- **Timeframe:** {args.start} to {args.end}")
+    print(f"- **Execution Time:** {elapsed_ms:.0f} ms")
+    print(f"- **Most Placed Color:** {color_counter.most_common(1)[0]}")
+    print(f"- **Most Placed Pixel Location:** ({pos_counter.most_common(1)[0]})")
 
 #minimum date: 2022-04-01 12:44:10.315 UTC
 #maximum date: 2022-04-05 00:14:00.207 UTC
