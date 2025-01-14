@@ -8,7 +8,7 @@ from datetime import datetime as dt
 INPUT_DT_FORMAT = '%Y-%m-%d %H'
 DATA_DT_FORMAT = '%Y-%m-%d %H:%M:%S.%f UTC'
 
-CHUNK_SIZE = 10_000
+CHUNK_SIZE = 100_000
 NUM_WORKERS = max(multiprocessing.cpu_count() - 1, 1)
 
 def parse_datetime_arg(dt_str):
@@ -113,7 +113,7 @@ def main():
         print(f"{color}: {count}")
   
     elapsed_ms = (t1 - t0) / 1_000_000
-    print(f"Execution time (multicore): {elapsed_ms:.2f} ms")
+    print(f"Execution time (multicore, chunk size {CHUNK_SIZE}): {elapsed_ms:.2f} ms")
 
 #minimum date: 2022-04-01 12:44:10.315 UTC
 #maximum date: 2022-04-05 00:14:00.207 UTC
