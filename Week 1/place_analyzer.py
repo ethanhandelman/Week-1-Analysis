@@ -12,6 +12,9 @@ CHUNK_SIZE = 200_000
 NUM_WORKERS = max(multiprocessing.cpu_count() - 1, 1)
 
 def parse_datetime_arg(dt_str):
+    """
+    Confirms that date given in program args is formatted correctly
+    """
     try:
         return dt.strptime(dt_str, INPUT_DT_FORMAT)
     except ValueError:
@@ -20,12 +23,6 @@ def parse_datetime_arg(dt_str):
 def convert_date_format(parsed_date):
     """
     Convert a date from '%Y-%m-%d %H' format to '%Y-%m-%d %H:%M:%S.%f UTC' format
-    
-    Args:
-        date_str (str): Date string in format '%Y-%m-%d %H'
-        
-    Returns:
-        str: Date string in format '%Y-%m-%d %H:%M:%S.%f UTC'
     """
     try:
         # Parse the input date string
@@ -39,6 +36,10 @@ def convert_date_format(parsed_date):
         return f"Error: Invalid date format. Please use YYYY-MM-DD HH format. {str(e)}"
 
 def validate_time_range(start_time, end_time):
+    """
+    Given a start and end time checks that start time is before end time,
+    if so returns formatted dates
+    """
     if end_time <= start_time:
         raise argparse.ArgumentTypeError('End time must be after start time')
     return convert_date_format(start_time), convert_date_format(end_time)
@@ -60,6 +61,29 @@ def analyze_chunk(lines, start_time, end_time):
     return color_counter, pos_counter
 
 def analyze_parallel(filename, start_time, end_time):
+    """
+    Analyzes a CSV file in parallel to count color and position frequencies within a time range.
+    Uses multiprocessing to distribute chunks of the file across multiple worker processes.
+    
+    The function reads the file line by line, groups lines into chunks, and processes each chunk
+    in parallel using a worker pool. Results from all chunks are merged into final counters.
+    
+    Args:
+        filename (str): Path to the CSV file to analyze
+        start_time (datetime): Start of the time range to analyze
+        end_time (datetime): End of the time range to analyze
+        
+    Returns:
+        tuple: A pair of Counter objects (color_counter, pos_counter) containing:
+            - color_counter: Frequency count of each color used
+            - pos_counter: Frequency count of each position modified
+            
+    Note:
+        - Assumes the input file has a header row that will be skipped
+        - Uses global constants NUM_WORKERS for pool size and CHUNK_SIZE for chunk length
+        - Requires an analyze_chunk() helper function to process individual chunks
+    """
+        
     color_counter = Counter()
     pos_counter = Counter()
 
@@ -95,7 +119,7 @@ def analyze_parallel(filename, start_time, end_time):
     return color_counter, pos_counter
 
 def main():
-    parser = argparse.ArgumentParser(description='Analyze color placement frequency in time range')
+    parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='filename to the CSV file')
     parser.add_argument('start', type=parse_datetime_arg, help='Start time (YYYY-MM-DD HH)')
     parser.add_argument('end', type=parse_datetime_arg, help='End time (YYYY-MM-DD HH)')
@@ -110,7 +134,6 @@ def main():
 
     t1 = pcn()
 
-    # Print results
     for color, count in color_counter.most_common(10):
         print(f"{color}: {count}")
   
