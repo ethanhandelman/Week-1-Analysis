@@ -49,16 +49,19 @@ def analyze_chunk(lines, start_time, end_time):
     only those whose timestamps are within [start_time, end_time].
     """
     color_counter = Counter()
+    pos_counter = Counter()
     reader = csv.reader(lines)
     for row in reader:
         # row[0] = timestamp, row[1] = user_id, row[2] = pixel_color, row[3] = coordinate
         timestamp = row[0]
         if start_time <= timestamp <= end_time:
             color_counter[row[2]] += 1
-    return color_counter
+            pos_counter[row[3]] 
+    return color_counter, pos_counter
 
 def analyze_parallel(filename, start_time, end_time):
     color_counter = Counter()
+    pos_counter = Counter()
 
     with multiprocessing.Pool(processes=NUM_WORKERS) as pool:
         tasks=[]
@@ -85,10 +88,11 @@ def analyze_parallel(filename, start_time, end_time):
 
         # Wait for tasks to finish and merge counters
         for t in tasks:
-            chunk_counter = t.get()
-            color_counter.update(chunk_counter)
+            chunk_color_counter, chunk_pos_counter = t.get()
+            color_counter.update(chunk_color_counter)
+            pos_counter.update(chunk_pos_counter)
 
-    return color_counter
+    return color_counter, pos_counter
 
     
 
@@ -104,7 +108,7 @@ def main():
 
     t0 = pcn()
 
-    color_counter = analyze_parallel(args.filename, start_time, end_time)
+    color_counter, pos_counter = analyze_parallel(args.filename, start_time, end_time)
 
     t1 = pcn()
 
@@ -112,6 +116,9 @@ def main():
     for color, count in color_counter.most_common(10):
         print(f"{color}: {count}")
   
+    for pos, count in pos_counter.most_common(10):
+        print(f"{pos}: {count}")
+
     elapsed_ms = (t1 - t0) / 1_000_000
     print(f"Execution time (multicore, chunk size {CHUNK_SIZE}): {elapsed_ms:.2f} ms")
 
