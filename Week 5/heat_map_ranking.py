@@ -75,7 +75,7 @@ plt.tight_layout()
 # Unstack the heatmap_data so that each region (block_y, block_x) is an entry.
 regions_series = heatmap_data.stack()  # MultiIndex: (block_y, block_x)
 # Sort regions in descending order by number of placements.
-top_regions = regions_series.sort_values(ascending=False).head(10)
+top_regions = regions_series.sort_values(ascending=False).head(20)
 
 print("Top 10 regions by pixel placements:")
 for (block_y, block_x), placements in top_regions.items():
